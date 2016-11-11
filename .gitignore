@@ -37,6 +37,5 @@ jspm_packages
 .node_repl_history
 
 #test-files 
-source.csv
-input.csv
-output.csv
+csvfiles
+csvfiles/
