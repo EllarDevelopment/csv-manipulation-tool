@@ -1,6 +1,6 @@
 {
   "name": "csv-manipulation-tool",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Tool for manipulating CSV-files (merging, distinct, ++).",
   "main": "index.js",
   "scripts": {
@@ -25,5 +25,10 @@
   "homepage": "https://github.com/EllarDevelopment/csv-manipulation-tool#readme",
   "bin": {
     "csv-manipulation-tool": "./index.js"
+  },
+  "dependencies": {
+    "colors": "^1.1.2",
+    "email-validator": "^1.0.7",
+    "flags": "^0.1.3"
   }
 }
