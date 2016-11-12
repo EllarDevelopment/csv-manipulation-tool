@@ -57,4 +57,4 @@ Just create a fork and make adjustments. If you think your edits bring additiona
 ##License
 Licensed under *Apache-2.0*. See `LICENSE`
 
-Copyright Ellar Development AS
+Copyright 2016 Ellar Development AS
