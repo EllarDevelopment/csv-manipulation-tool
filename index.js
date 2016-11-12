@@ -31,7 +31,9 @@ var target = (flags.get('t') == null ? flags.get('target') : flags.get('t'));
 var output = (flags.get('o') == null ? flags.get('output') : flags.get('o'));
 var action = (flags.get('a') == 'join' ? flags.get('action') : flags.get('a'));
 
-if (source == null || input == null || output == null) {
+var validate_emails = (source != null && output != null && (input == null) && (action == 'validate'));
+
+if (!validate_emails && (source == null || input == null || output == null)) {
     console.log(colors.red('Source, input and output must be supplied..'));
     process.exit(0);
 }
@@ -52,7 +54,9 @@ var CSVParser = function() {
 
     this.stats = {
         added: 0,
-        subtracted: 0
+        subtracted: 0,
+        validated: 0,
+        invalid: 0
     };
 
     this.setTarget = function(trg) {
@@ -114,7 +118,10 @@ var CSVParser = function() {
             self.join();
         } else if (self.action.toLowerCase() == 'subtract') {
             self.subtract(); 
-        } else {
+        } else if (self.action.toLowerCase() == 'validate') {
+            self.validate();
+        }
+        else {
             console.log(colors.red('No valid action specified.'));
             process.exit(0);
         }
@@ -128,6 +135,8 @@ var CSVParser = function() {
         console.log('-------------------------------');
         console.log(colors.magenta('Added: ') + self.stats.added);
         console.log(colors.magenta('Subtracted: ') + self.stats.subtracted);
+        console.log(colors.magenta('Validated (e-mail): ') + self.stats.validated);
+        console.log(colors.magenta('Invalid (e-mail): ') + self.stats.invalid);
 
         this.writeOutput();
     }
@@ -154,15 +163,22 @@ var CSVParser = function() {
     this.lowercase = function() {
         console.log('Starting ' + colors.cyan('lowercase-process.'));
 
-        console.log(colors.cyan('lowercase-process') + ' on: ' + colors.yellow('source'));
-        for (var i = 0; i < self.source.length; i++) {
-            self.source[i] = self.source[i].toLowerCase();
+        if (self.source != null) {
+            console.log(colors.cyan('lowercase-process') + ' on: ' + colors.yellow('source'));
+            for (var i = 0; i < self.source.length; i++) {
+                self.source[i] = self.source[i].toLowerCase();
+            }
+            //end source null
         }
 
-        console.log(colors.cyan('lowercase-process') + ' on: ' + colors.yellow('input'));
-        for (var i = 0; i < self.input.length; i++) {
-            self.input[i] = self.input[i].toLowerCase();
+        if (self.input != null) {
+            console.log(colors.cyan('lowercase-process') + ' on: ' + colors.yellow('input'));
+            for (var i = 0; i < self.input.length; i++) {
+                self.input[i] = self.input[i].toLowerCase();
+            }
+            //end source null
         }
+        
     }
 
     this.join = function() {
@@ -184,6 +200,7 @@ var CSVParser = function() {
 
                     if (!validator.validate(col)) {
                         console.log(colors.yellow.bold("!! Invalid e-mail: " + col + " !!"));
+                        self.stats.invalid++;
                         continue;
                     }
 
@@ -246,13 +263,36 @@ var CSVParser = function() {
         //end subtract-action
     }
 
+    this.validate = function() {
+
+        var newSource = []; 
+
+        for (var i = 0; i < self.source.length; i++) {
+            var row = self.source[i].trim();
+            if (!validator.validate(row)) {
+                console.log(colors.yellow.bold("Invalid e-mail: " + row));
+                self.stats.invalid++;
+                continue;
+            }
+            
+            newSource.push(row);
+            self.stats.validated++;
+        }
+
+        self.source = newSource;
+        
+        this.summary();
+
+        //end validate 
+    }
+
     //end CSVParser 
 }
 
 var parser = new CSVParser();
 parser.setTarget(target); 
 parser.setSource(source);
-parser.setInput(input);
+if (!validate_emails) parser.setInput(input);
 parser.setAction(action);
 parser.setOutput(output);
 parser.start(); 
