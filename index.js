@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var fs = require('fs');
 var flags = require('flags');
 var colors = require('colors');
